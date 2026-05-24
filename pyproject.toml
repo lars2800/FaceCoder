@@ -4,4 +4,6 @@ version = "0.0.1"
 description = "A ML project to learn about autoencoders and image-generation"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = []
+dependencies = [
+    "kagglehub==1.0.1"
+]

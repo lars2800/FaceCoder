@@ -1,5 +1,9 @@
+
+def train():
+    import datasets
+
 def main():
-    print("Hello from facecoder!")
+    train()
 
 
 if __name__ == "__main__":
