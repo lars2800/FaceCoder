@@ -19,4 +19,4 @@ Development guidde;
 - open folder in IDE
 - add exact dependency version to pyproject.toml
 
-- use uv run <file to run>.py to test
+- use uv run file.py to test
