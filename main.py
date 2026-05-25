@@ -1,8 +1,10 @@
 import logging; LOGGER = logging.getLogger(__name__)
 import torch
 import os
+import tqdm
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
+from torch.utils.data import DataLoader
 
 torch.set_num_threads(16)
 
@@ -18,27 +20,30 @@ def train():
     # Create a dataset
     import datasets
     dataset = datasets.TorchDataset("ashwingupta3012_human_faces",limit=512,starting_index=0)
+    train_loader = DataLoader(dataset, batch_size=32, shuffle=True, num_workers=4)
     
     # Start training
-    import tqdm
     EPOCHS = 10
+    model.train()
     for epoch in range(EPOCHS):
 
         running_loss = 0.0
 
-        for image in tqdm.tqdm(dataset,f"Epoch {epoch+1}/{EPOCHS} progress: "):
+        for batch_images in tqdm.tqdm(train_loader, desc=f"Epoch {epoch+1}/{EPOCHS}"):
 
-            # Check how good our current model is
-            out = model(image)
-            loss = model.criterion(out,image)
+            # Flatten images to (batch_size, 4096)
+            batch_images = batch_images.view(batch_images.size(0), -1)
 
-            # Improve it
+            # Forward pass
+            out = model(batch_images)
+            loss = model.criterion(out, batch_images)
+
+            # Backward pass
             model.optimizer.zero_grad()
             loss.backward()
             model.optimizer.step()
 
-            # Save some statistics
-            running_loss += loss.item()
+            running_loss += loss.item() * batch_images.size(0)
         
         avg_loss = running_loss / len(dataset)
         LOGGER.info(f"Epoch {epoch+1}/{EPOCHS} loss: {avg_loss}")
@@ -49,67 +54,19 @@ def train():
     LOGGER.info(f"Saved checkpoint to {checkpoint_path}")
 
 def review():
-    # Create a neural network
-    import networks
-    model = networks.ImageAutoencoder( 64 * 64, 256, 8 )
-
-    # Load the trained weights if they exist
-    checkpoint_path = f"checkpoints/autoencoder_{model.inSizeVar}_{model.numLayersVar}_{model.bottleneckSizeVar}.pt"
-    if os.path.exists(checkpoint_path):
-        model.load_state_dict(torch.load(checkpoint_path))
-        LOGGER.info(f"Loaded weights from {checkpoint_path}")
-    else:
-        LOGGER.warning("No checkpoint found! Displaying outputs from an untrained model.")
-
-    # Set model to evaluation mode
-    model.eval()
-
-    # Create a dataset (using 10 validation images)
-    import datasets
-    dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=10, starting_index=512)
-    
-    originals = []
-    reconstructions = []
-
-    # Run images through the model without calculating gradients
-    with torch.no_grad():
-        for image in dataset:
-            # Pass through the model
-            reconstructed_image = model(image)
-            
-            # Reshape from flat vectors back to (Channels, Height, Width) -> (1, 64, 64)
-            # Adjust the shapes if your dataset uses 3 channels (RGB) instead of 1 (Grayscale)
-            originals.append(image.view(1, 64, 64))
-            reconstructions.append(reconstructed_image.view(1, 64, 64))
-
-    # Stack lists into batches: shape (10, 1, 64, 64)
-    orig_tensor = torch.stack(originals)
-    recon_tensor = torch.stack(reconstructions)
-
-    # Combine both rows: Top row is original, Bottom row is model output
-    comparison_tensor = torch.cat([orig_tensor, recon_tensor], dim=0)
-
-    # Create a grid layout (nrow=10 means 10 images per row)
-    grid = vutils.make_grid(comparison_tensor, nrow=10, normalize=True)
-
-    # Convert PyTorch tensor (C, H, W) to Matplotlib format (H, W, C)
-    grid_np = grid.permute(1, 2, 0).cpu().numpy()
-
-    # Plot the result
-    plt.figure(figsize=(12, 4))
-    plt.title("Original Images (Top) vs Model Reconstructions (Bottom)")
-    plt.imshow(grid_np, cmap='gray' if grid_np.shape[2] == 1 else None)
-    plt.axis('off')
-    
-    # Show the plot window, or uncomment the next line to save it as an image file
-    plt.show()
-    # plt.savefig("comparison_results.png", bbox_inches='tight')
-
+    pass
 
 def main():
+    import sys
+
     logging.basicConfig(level=logging.INFO)
     
-    review()
+    # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
+    if "train" in sys.argv[1:]:
+        train()
+    
+    if "view" in sys.argv[1:]:
+        review()
 
 
 if __name__ == "__main__":
