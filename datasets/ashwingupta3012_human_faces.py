@@ -8,9 +8,10 @@ from datasets import DatasetInterface
 import kagglehub
 
 class Dataset(DatasetInterface):
-    def __init__(self) -> None:
+    def __init__(self,limit:int) -> None:
         self.path:str|None = None
         self.length:int = -1
+        self.limit:int = limit
     
     def transform(self,image:Image.Image) -> np.ndarray:
         x = image.convert("L")
@@ -41,7 +42,7 @@ class Dataset(DatasetInterface):
         
         # Listt  all images in teh datset
         image_names = os.listdir(f"{folder}")
-        image_paths = [ f"{folder}{image_name}" for image_name in image_names if (image_name.endswith(".png")) or (image_name.endswith(".jpg")) or (image_name.endswith(".jpeg")) ]
+        image_paths = [ f"{folder}{image_name}" for image_name in image_names if (image_name.endswith(".png")) or (image_name.endswith(".jpg")) or (image_name.endswith(".jpeg")) ][0:self.limit]
         self.length = len(image_paths)
 
         # now load the dataset into memory
