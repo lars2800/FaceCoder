@@ -18,7 +18,7 @@ class ImageAutoencoder(torch.nn.Module):
 
         self.inSizeVar = inSize
         self.bottleneckSizeVar = bottleneckSize
-        self.numLayers = num_layers
+        self.numLayersVar = num_layers
 
         # --- Encoder ---
         LOGGER.info("Creating encoding layers")

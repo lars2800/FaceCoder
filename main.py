@@ -2,10 +2,9 @@ import logging; LOGGER = logging.getLogger(__name__)
 import torch
 import os
 import tqdm
-import matplotlib.pyplot as plt
-import torchvision.utils as vutils
 from torch.utils.data import DataLoader
 
+from devices import DEVICE
 torch.set_num_threads(16)
 
 def train():
@@ -15,7 +14,7 @@ def train():
 
     # Create a neural network
     import networks
-    model = networks.ImageAutoencoder( 64 * 64, 256, 8 )
+    model = networks.ImageAutoencoder( 64 * 64, 256, 8 ).to(DEVICE)
 
     # Create a dataset
     import datasets
@@ -32,7 +31,7 @@ def train():
         for batch_images in tqdm.tqdm(train_loader, desc=f"Epoch {epoch+1}/{EPOCHS}"):
 
             # Flatten images to (batch_size, 4096)
-            batch_images = batch_images.view(batch_images.size(0), -1)
+            batch_images = batch_images.view(batch_images.size(0), -1).to(DEVICE)
 
             # Forward pass
             out = model(batch_images)
