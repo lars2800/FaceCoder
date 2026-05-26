@@ -1,5 +1,5 @@
 import logging; LOGGER = logging.getLogger(__name__)
-import sys
+
 import torch
 from torch.utils.data import DataLoader
 import matplotlib.pyplot as plt
@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from devices import DEVICE
 import networks
 import datasets
+import misc
 
 torch.set_num_threads(16)
 
@@ -44,8 +45,10 @@ class Trainer:
         #
 
         for epoch in range(self.EPOCHS):
+            timer = misc.Timer.begin()
             self.train_auto_encoder_epoch(epoch)
             self.train_discriminator_epoch(epoch)
+            LOGGER.info(f"Epoch finsihed in: {timer}")
         
         self.save("checkpoints/checkpoint.pth")
     
