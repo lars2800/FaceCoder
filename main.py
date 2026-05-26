@@ -16,8 +16,8 @@ class Trainer:
         #
         # Settings
         #
-        self.EPOCHS = 50
-        self.adv_loss_mult = 0.002
+        self.EPOCHS = 100
+        self.adv_loss_mult = 0.00125
 
         #
         # Create neural networks and optimizers
@@ -26,8 +26,8 @@ class Trainer:
         self.auto_encoder_model   = networks.SimpleImageAutoEncoder(in_channels=1).to(DEVICE)
         self.discriminator_model  = networks.SimpleImageDiscirminator(in_channels=1).to(DEVICE)
 
-        self.optimizer_auto_encoder = torch.optim.Adam(self.auto_encoder_model.parameters(), lr=0.0002)
-        self.optimizer_discriminator = torch.optim.Adam(self.discriminator_model.parameters(), lr=0.0002)
+        self.optimizer_auto_encoder = torch.optim.Adam(self.auto_encoder_model.parameters(), lr=0.0002125)
+        self.optimizer_discriminator = torch.optim.Adam(self.discriminator_model.parameters(), lr=0.0002125)
         
         self.reconstruction_criterion = torch.nn.MSELoss()
         self.adversarial_criterion = torch.nn.BCELoss()
@@ -36,7 +36,7 @@ class Trainer:
         # Load datset
         #
 
-        dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=512, starting_index=0)
+        dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=4096, starting_index=0)
         self.train_loader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=0)
     
     def train(self) -> None:
