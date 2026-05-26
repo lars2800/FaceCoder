@@ -36,7 +36,7 @@ class Trainer:
         # Load datset
         #
 
-        dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=4096, starting_index=0)
+        dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=512, starting_index=0)
         self.train_loader = DataLoader(dataset, batch_size=128, shuffle=True, num_workers=0)
     
     def train(self) -> None:
