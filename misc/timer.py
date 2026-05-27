@@ -21,7 +21,7 @@ class Timer:
         time_m_total  = math.floor( time_s_total / 60 )
         time_h_total  = math.floor( time_m_total / 60 )
 
-        time_ms = time_ms_total - ( time_s_total * 1000 ) - ( time_m_total * 60 * 1000 ) - ( time_h_total * 60 * 60 * 1000 )
+        time_ms = ( time_s_total * 1000 ) % 1000
         time_s  = time_s_total  - ( time_m_total * 60  ) - ( time_h_total * 60 * 60 )
         time_m  = time_m_total  - ( time_h_total * 60 )
         time_h  = time_h_total

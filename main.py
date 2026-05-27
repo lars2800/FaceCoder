@@ -16,8 +16,8 @@ class Trainer:
         #
         # Settings
         #
-        self.EPOCHS = 100
-        self.adv_loss_mult = 0.00125
+        self.EPOCHS = 20
+        self.adv_loss_mult = 0.001
 
         #
         # Create neural networks and optimizers
@@ -26,11 +26,11 @@ class Trainer:
         self.auto_encoder_model   = networks.SimpleImageAutoEncoder(in_channels=1).to(DEVICE)
         self.discriminator_model  = networks.SimpleImageDiscirminator(in_channels=1).to(DEVICE)
 
-        self.optimizer_auto_encoder = torch.optim.Adam(self.auto_encoder_model.parameters(), lr=0.0002125)
+        self.optimizer_auto_encoder  = torch.optim.Adam(self.auto_encoder_model.parameters(), lr=0.0002125)
         self.optimizer_discriminator = torch.optim.Adam(self.discriminator_model.parameters(), lr=0.0002125)
         
         self.reconstruction_criterion = torch.nn.MSELoss()
-        self.adversarial_criterion = torch.nn.BCELoss()
+        self.adversarial_criterion    = torch.nn.BCELoss()
 
         #
         # Load datset
@@ -41,42 +41,36 @@ class Trainer:
     
     def train(self) -> None:
         #
-        # Main train loop
+        # Phase 1: Train AutoEncoder and Discriminator
         #
-
+        LOGGER.info("--- Starting Phase 1: Training AutoEncoder and Discriminator ---")
         for epoch in range(self.EPOCHS):
             timer = misc.Timer.begin()
             self.train_auto_encoder_epoch(epoch)
             self.train_discriminator_epoch(epoch)
-            LOGGER.info(f"Epoch finsihed in: {timer}")
-        
+            LOGGER.info(f"Epoch finished in: {timer}")
+
         self.save("checkpoints/checkpoint.pth")
     
-    def freezer(self,fase_is_encoder:bool) -> None:
-        #
-        # Freezes and unfreesez parameters as needed
-        #
-
-        if ( fase_is_encoder ):
+    def freezer(self, fase_is_encoder: bool) -> None:
+        if fase_is_encoder:
             # Freeze discriminator / Unfreeze autoencoder
             self.discriminator_model.eval()
-
             for param in self.discriminator_model.parameters():
                 param.requires_grad = False
-            for param in self.discriminator_model.parameters():
-                param.requires_grad = True
-            
+                
             self.auto_encoder_model.train(True)
-        
-        else:
-            self.auto_encoder_model.eval()
-
-            for param in self.auto_encoder_model.parameters():
-                param.requires_grad = False
             for param in self.auto_encoder_model.parameters():
                 param.requires_grad = True
-            
+        else:
+            # Freeze autoencoder / Unfreeze discriminator
+            self.auto_encoder_model.eval()
+            for param in self.auto_encoder_model.parameters():
+                param.requires_grad = False
+                
             self.discriminator_model.train(True)
+            for param in self.discriminator_model.parameters():
+                param.requires_grad = True
 
     def train_auto_encoder_epoch(self, epoch: int):
         self.freezer( fase_is_encoder=True )
@@ -138,23 +132,16 @@ class Trainer:
 
         avg_loss = running_loss / len(self.train_loader)
         LOGGER.info(f"Discriminator - Epoch {epoch+1}/{self.EPOCHS} avg. loss: {avg_loss:.4f}")
-    
+ 
     def save(self, filepath: str = "checkpoint.pth") -> None:
-        #
-        # Saving the model
-        #
-        
         LOGGER.info(f"Saving model checkpoints to {filepath}...")
-        
         checkpoint = {
             "autoencoder_state_dict": self.auto_encoder_model.state_dict(),
-            "discriminator_state_dict": self.discriminator_model.state_dict()
+            "discriminator_state_dict": self.discriminator_model.state_dict(),
         }
-
         try:
             torch.save(checkpoint, filepath)
             LOGGER.info("Checkpoints saved successfully.")
-        
         except Exception as e:
             LOGGER.error(f"Failed to save checkpoints: {e}")
 
@@ -162,10 +149,8 @@ class Reviewer:
     def __init__(self, num_visualizations: int = 8) -> None:
         self.num_visualizations = num_visualizations
         
-        # Re-initialize the same AutoEncoder structure
         self.autoEncoder = networks.SimpleImageAutoEncoder(in_channels=1).to(DEVICE)
         
-        # Load dataset to grab a validation/review batch
         dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=num_visualizations, starting_index=4096)
         self.view_loader = DataLoader(dataset, batch_size=self.num_visualizations, shuffle=True, num_workers=0)
 
@@ -178,33 +163,28 @@ class Reviewer:
             LOGGER.error(f"Could not load checkpoint: {e}")
             return
 
-        # Put the model into evaluation mode
         self.autoEncoder.eval()
         
-        # Get one batch of images
         batch_images = next(iter(self.view_loader))
         batch_images = batch_images.view(-1, 1, 64, 64).to(DEVICE)
         
-        # Generate predictions without tracking gradients
         with torch.no_grad():
             reconstructed_images = self.autoEncoder(batch_images)
             
-        # Move tensors back to CPU and convert to numpy for plotting
         originals = batch_images.cpu().numpy()
         reconstructions = reconstructed_images.cpu().numpy()
         
-        # Setup matplotlib figure: 2 rows (Originals on top, Autoencoded on bottom)
-        fig, axes = plt.subplots(2, self.num_visualizations, figsize=(self.num_visualizations * 2, 5))
+        fig, axes = plt.subplots(2, self.num_visualizations, figsize=(self.num_visualizations * 2, 7))
         
         for i in range(self.num_visualizations):
-            # --- Top Row: Original Images ---
+            # Row 1: Originals
             ax_orig = axes[0, i]
             ax_orig.imshow(originals[i, 0], cmap='gray')
             ax_orig.axis('off')
             if i == 0:
                 ax_orig.set_title("Originals", fontsize=12, fontweight='bold', loc='left')
                 
-            # --- Bottom Row: Autoencoded Images ---
+            # Row 2: Autoencoded
             ax_recon = axes[1, i]
             ax_recon.imshow(reconstructions[i, 0], cmap='gray')
             ax_recon.axis('off')
