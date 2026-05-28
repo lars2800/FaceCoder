@@ -24,13 +24,9 @@ class Dataset(DatasetInterface):
         return x
 
     def download(self) -> None:
-        LOGGER.info("Downloading datset or loading from disk")
         self.path = kagglehub.dataset_download("ashwingupta3012/human-faces",force_download=False)
-        LOGGER.info("Done downloading or loading dataset from disk")
     
     def pre_load(self) -> None:
-
-        LOGGER.info(f"Loading images into memory..")
         
         if ( self.path == None ):
             LOGGER.critical("Dataset path was None, should be a string pointing towards the database")
@@ -49,7 +45,7 @@ class Dataset(DatasetInterface):
         # now load the dataset into memory
         self.data_cache = np.zeros( shape=(self.length,64*64) , dtype=np.float32 )
 
-        for index,image_path in enumerate(tqdm.tqdm( image_paths, "images loaded: " )):
+        for index,image_path in enumerate(tqdm.tqdm( image_paths, "Loading images: " )):
             x = self.transform( Image.open(image_path) )
             self.data_cache[index] = x
 

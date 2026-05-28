@@ -1,7 +1,42 @@
 import logging
+import torch
 import torch.nn as nn
+from devices import DEVICE
 
 LOGGER = logging.getLogger(__name__)
+
+class SimpleAdversarialNetwork:
+    def __init__(self) -> None:
+        self.model_auto_encoder = SimpleImageAutoEncoder(1)
+        self.model_discriminator = SimpleImageDiscirminator(1)
+    
+    def save(self,filepath:str="checkpoints/model.pth") -> None:
+        LOGGER.info(f"Saving model checkpoints to {filepath}...")
+        checkpoint = {
+            "autoencoder_state_dict": self.model_auto_encoder.state_dict(),
+            "discriminator_state_dict": self.model_discriminator.state_dict(),
+        }
+        try:
+            torch.save(checkpoint, filepath)
+            LOGGER.info("Checkpoints saved successfully.")
+        except Exception as e:
+            LOGGER.error(f"Failed to save checkpoints: {e}")
+    
+    def load(self, filepath: str = "checkpoints/model.pth") -> None:
+        LOGGER.info(f"Loading model checkpoints from {filepath}...")
+        try:
+            # 1. Load the checkpoint dictionary from the file
+            checkpoint = torch.load(filepath, map_location=torch.device(DEVICE))
+            
+            # 2. Restoring the weights into the sub-models
+            self.model_auto_encoder.load_state_dict(checkpoint["autoencoder_state_dict"])
+            self.model_discriminator.load_state_dict(checkpoint["discriminator_state_dict"])
+            
+            LOGGER.info("Checkpoints loaded successfully.")
+        except FileNotFoundError:
+            LOGGER.error(f"Checkpoint file not found at {filepath}")
+        except Exception as e:
+            LOGGER.error(f"Failed to load checkpoints: {e}")
 
 class SimpleImageAutoEncoder(nn.Module):
     def __init__(self, in_channels: int = 3) -> None:
