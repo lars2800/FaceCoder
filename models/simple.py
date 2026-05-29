@@ -75,6 +75,7 @@ class SimpleImageAutoEncoder(nn.Module):
             nn.ReLU(),
 
             nn.ConvTranspose2d(32, in_channels, kernel_size=4, stride=2, padding=1), # 32x32 -> 64x64
+            nn.Sigmoid()
         )
     
     def forward(self, x):
@@ -102,7 +103,6 @@ class SimpleImageDiscirminator(nn.Module):
 
             nn.Flatten(), # Flattens the 256 channels of 8x8 features into a vector
             nn.Linear(256 * 8 * 8, 1),
-            nn.Sigmoid(),
         )
     
     def forward(self, x):

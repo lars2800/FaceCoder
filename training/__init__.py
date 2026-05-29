@@ -13,12 +13,12 @@ class SimpleAdversarialTrainer:
         self.datset_size = datset_size
         self.EPOCHS = epochs
         self.reconstruction_loss_mult = 1.0
-        self.adversarial_loss_mult = 0.005
-        self.learn_rate = 0.00015
+        self.adversarial_loss_mult = 0.05
+        self.learn_rate = 0.0002
 
         self.load_dataset(
             num_images=datset_size,  # Images to load each epoch, maybe breaks if bigger then num images in datset --\_( 0 _ 0 )_/-- ( too lazy to explain )
-            batch_size=128    # How many images to run trough the model at once during training
+            batch_size=64    # How many images to run trough the model at once during training
         )
         self.load_models()
         self.create_optimizers_and_critereons()
@@ -109,7 +109,7 @@ class SimpleAdversarialTrainer:
             correct_prediction = torch.zeros_like(predicted).to(DEVICE) # 0 = fake
             loss_fake = self.adversarial_criterion(predicted, correct_prediction)
 
-            total_loss = (loss_real + loss_fake) * 0.5
+            total_loss = (loss_real + loss_fake)
 
             #
             # backward pass

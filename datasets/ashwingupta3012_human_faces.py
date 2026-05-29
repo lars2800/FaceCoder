@@ -3,9 +3,18 @@ import os
 import PIL.Image as Image
 import numpy as np
 import tqdm
+import warnings
 
 from datasets import DatasetInterface
 import kagglehub
+
+
+# Silence the specific Pillow palette transparency warning
+warnings.filterwarnings(
+    "ignore", 
+    category=UserWarning, 
+    message="Palette images with Transparency expressed in bytes should be converted to RGBA images"
+)
 
 class Dataset(DatasetInterface):
     def __init__(self,limit:int,starting_index:int) -> None:
@@ -46,6 +55,7 @@ class Dataset(DatasetInterface):
         self.data_cache = np.zeros( shape=(self.length,64*64) , dtype=np.float32 )
 
         for index,image_path in enumerate(tqdm.tqdm( image_paths, "Loading images: " )):
+            
             x = self.transform( Image.open(image_path) )
             self.data_cache[index] = x
 

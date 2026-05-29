@@ -20,7 +20,7 @@ class Reviewer:
         dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=num_visualizations, starting_index=4096)
         self.view_loader = DataLoader(dataset, batch_size=self.num_visualizations, shuffle=True, num_workers=0)
 
-    def review(self, filepath: str = "checkpoints/model1.pth") -> None:
+    def review(self, filepath) -> None:
         self.model.load(filepath)
 
         self.model.model_auto_encoder.eval()
@@ -63,12 +63,12 @@ def main():
     # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
     if "train" in sys.argv[1:]:
         training.SimpleAdversarialTrainer(
-            epochs=30, # 100 epochs = 10min ( 4096 size )
-            datset_size=4096
+            epochs=500, # 100 epochs = 10min ( 4096 size )
+            datset_size=1024
         ).train()
     
     if "view" in sys.argv[1:]:
-        Reviewer().review()
+        Reviewer().review("checkpoints/model.pth")
 
 
 if __name__ == "__main__":
