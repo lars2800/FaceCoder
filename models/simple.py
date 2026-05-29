@@ -75,7 +75,6 @@ class SimpleImageAutoEncoder(nn.Module):
             nn.ReLU(),
 
             nn.ConvTranspose2d(32, in_channels, kernel_size=4, stride=2, padding=1), # 32x32 -> 64x64
-            nn.Sigmoid(),  # Assumes input pixel values are normalized between 0 and 1
         )
     
     def forward(self, x):

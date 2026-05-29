@@ -63,8 +63,8 @@ def main():
     # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
     if "train" in sys.argv[1:]:
         training.SimpleAdversarialTrainer(
-            epochs=100, # 100 epochs = 10min ( 4096 size )
-            datset_size=128
+            epochs=30, # 100 epochs = 10min ( 4096 size )
+            datset_size=4096
         ).train()
     
     if "view" in sys.argv[1:]:
