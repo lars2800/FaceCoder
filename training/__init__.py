@@ -5,15 +5,17 @@ import torch
 from devices import DEVICE
 import models
 import datasets
+import misc
 
 class SimpleAdversarialTrainer:
     def __init__(self,epochs=25,datset_size:int=1024) -> None:
 
         self.EPOCHS = epochs
         self.reconstruction_loss_mult = 1.0
-        self.adversarial_loss_mult = 0.002
+        self.adversarial_loss_mult = 0.005
+        self.learn_rate = 0.00015
 
-        self.load_datset(
+        self.load_dataset(
             num_images=datset_size,  # Images to load each epoch, maybe breaks if bigger then num images in datset --\_( 0 _ 0 )_/-- ( too lazy to explain )
             batch_size=128    # How many images to run trough the model at once during training
         )
@@ -21,15 +23,15 @@ class SimpleAdversarialTrainer:
         self.create_optimizers_and_critereons()
     
     def create_optimizers_and_critereons(self) -> None:
-        self.optimizer_auto_encoder  = torch.optim.Adam(self.model.model_auto_encoder.parameters(), lr=0.0002125)
-        self.optimizer_discriminator = torch.optim.Adam(self.model.model_discriminator.parameters(), lr=0.0002125)
+        self.optimizer_auto_encoder  = torch.optim.Adam(self.model.model_auto_encoder.parameters(),  lr=self.learn_rate)
+        self.optimizer_discriminator = torch.optim.Adam(self.model.model_discriminator.parameters(), lr=self.learn_rate)
 
         self.reconstruction_criterion = torch.nn.MSELoss()
-        self.adversarial_criterion    = torch.nn.BCELoss()
+        self.adversarial_criterion    = torch.nn.BCEWithLogitsLoss()
     
     def train(self):
-
-        for epoch in range(self.EPOCHS):
+        
+        for epoch in misc.RainbowProgressBar(range(self.EPOCHS), bar_format='[{elapsed} > {remaining} | {rate_fmt}] epoch {n_fmt}/{total_fmt} |{bar}| {postfix}'):
             self.train_auto_encoder_epoch(epoch)
             self.train_discriminator_epoch(epoch)
         
@@ -59,7 +61,6 @@ class SimpleAdversarialTrainer:
         
         # Calculate epoch loss
         avg_loss = running_loss / len(self.auto_encoder_dataloader)
-        LOGGER.info(f"AutoEncoder - Epoch {epoch+1}/{self.EPOCHS} avg. loss: {avg_loss:.4f}")
     
     def train_discriminator_epoch(self,epoch) -> None:
 
@@ -101,7 +102,6 @@ class SimpleAdversarialTrainer:
         
         # Calculate epoch loss
         avg_loss = running_loss / len(self.discriminator_dataloader)
-        LOGGER.info(f"Discriminator - Epoch {epoch+1}/{self.EPOCHS} avg. loss: {avg_loss:.4f}")
     
     def calculate_auto_encoder_loss(self,original_batch,auto_encoded_batch):
 
@@ -136,7 +136,7 @@ class SimpleAdversarialTrainer:
         """        
         self.model = models.SimpleAdversarialNetwork()
     
-    def load_datset(self,num_images:int=4096,batch_size:int=128) -> None:
+    def load_dataset(self,num_images:int=4096,batch_size:int=128) -> None:
         """
         Loads the datset
         """
