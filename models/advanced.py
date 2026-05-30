@@ -17,6 +17,10 @@ class AdvancedAdversarialNetwork:
         self.model_auto_encoder = AdvancedImageAutoEncoder(in_channels=1, latent_dim=latent_dim)
         self.model_discriminator = AdvancedLatentDiscriminator(latent_dim=latent_dim)
     
+    def to(self,device) -> None:
+        self.model_auto_encoder.to(device)
+        self.model_discriminator.to(device)
+    
     def save(self, filepath: str="checkpoints/model_advanced.pth") -> None:
         LOGGER.info(f"Saving model checkpoints to {filepath}...")
         checkpoint = {

@@ -102,7 +102,7 @@ class AdvancedAdversarialTrainer(ImageTrainertemplate):
         """
         Create the neural nets
         """        
-        self.model = models.AdvancedAdversarialNetwork()
+        self.model = models.AdvancedAdversarialNetwork().to(DEVICE)
     
     def freezer(self, fase_is_encoder: bool) -> None:
         """
