@@ -41,7 +41,11 @@ class Dataset(DatasetInterface):
             LOGGER.critical("Dataset path was None, should be a string pointing towards the database")
             return
         
-        folder = f"{self.path}\\Humans\\"
+        if ( os.name == "nt" ):
+            folder = f"{self.path}\\Humans\\"
+        else:
+            folder = f"{self.path}/Humans/"
+
         if ( not os.path.exists(folder) ):
             LOGGER.critical("Dataset format not excpected, no ")
             return
