@@ -1,5 +1,5 @@
 import tqdm
-import colorsys
+import math
 
 #
 # Yay custimization!
@@ -12,12 +12,11 @@ class RainbowProgressBar(tqdm.tqdm):
     @staticmethod
     def get_rainbow_rgb(phase):
         """Generates vibrant RGB values covering all main colors using HSV."""
-        # Ensure phase stays strictly between 0.0 and 1.0
-        hue = phase % 1.0
+        x = (phase % 1.0) * math.pi * math.pi * 0.5 # i love me some magic numbers!
         
-        # 1.0 Saturation = maximum color intensity
-        # 1.0 Value = maximum brightness
-        r_float, g_float, b_float = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+        g_float = max( math.sin( x  ), 0 )
+        b_float = max( math.sin( x - 0.5 * math.pi ), 0)
+        r_float= max( math.sin( x + 0.5 * math.pi ), 0)
         
         # Convert from [0.0, 1.0] floats to [0, 255] integers
         r = int(r_float * 255)
