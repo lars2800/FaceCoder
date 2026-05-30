@@ -7,8 +7,8 @@ LOGGER = logging.getLogger(__name__)
 
 class SimpleAdversarialNetwork:
     def __init__(self) -> None:
-        self.model_auto_encoder = SimpleImageAutoEncoder(1)
-        self.model_discriminator = SimpleImageDiscirminator(1)
+        self.model_auto_encoder = SimpleImageAutoEncoder(1).to(DEVICE)
+        self.model_discriminator = SimpleImageDiscirminator(1).to(DEVICE)
     
     def save(self,filepath:str="checkpoints/model.pth") -> None:
         LOGGER.info(f"Saving model checkpoints to {filepath}...")

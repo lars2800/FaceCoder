@@ -3,6 +3,7 @@
 # refactored the above code using Ai to work within the framework                                 #
 #=================================================================================================#
 
+from __future__ import annotations
 import logging
 import torch
 import torch.nn as nn
@@ -17,9 +18,10 @@ class AdvancedAdversarialNetwork:
         self.model_auto_encoder = AdvancedImageAutoEncoder(in_channels=1, latent_dim=latent_dim)
         self.model_discriminator = AdvancedLatentDiscriminator(latent_dim=latent_dim)
     
-    def to(self,device) -> None:
+    def to(self,device) -> AdvancedAdversarialNetwork:
         self.model_auto_encoder.to(device)
         self.model_discriminator.to(device)
+        return self
     
     def save(self, filepath: str="checkpoints/model_advanced.pth") -> None:
         LOGGER.info(f"Saving model checkpoints to {filepath}...")
