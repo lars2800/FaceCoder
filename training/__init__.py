@@ -51,7 +51,7 @@ class ImageTrainertemplate(ABC):
 
         for epoch in self.epoch_bar:
             if ( epoch % 100 == 99 ):
-                self.model.save() 
+                self.model.save(log=False) 
             self.train_epoch(epoch)
         
         print("\n",end="")

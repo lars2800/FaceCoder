@@ -23,17 +23,17 @@ class AdvancedAdversarialNetwork:
         self.model_discriminator.to(device)
         return self
     
-    def save(self, filepath: str="checkpoints/model_advanced.pth") -> None:
-        LOGGER.info(f"Saving model checkpoints to {filepath}...")
+    def save(self, filepath: str="checkpoints/model_advanced.pth",log:bool=True) -> None:
+        if log: LOGGER.info(f"Saving model checkpoints to {filepath}...")
         checkpoint = {
             "autoencoder_state_dict": self.model_auto_encoder.state_dict(),
             "discriminator_state_dict": self.model_discriminator.state_dict(),
         }
         try:
             torch.save(checkpoint, filepath)
-            LOGGER.info("Checkpoints saved successfully.")
+            if log:LOGGER.info("Checkpoints saved successfully.")
         except Exception as e:
-            LOGGER.error(f"Failed to save checkpoints: {e}")
+            if log:LOGGER.error(f"Failed to save checkpoints: {e}")
     
     def load(self, filepath: str = "checkpoints/model_advanced.pth") -> None:
         LOGGER.info(f"Loading model checkpoints from {filepath}...")
