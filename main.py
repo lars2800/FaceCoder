@@ -74,12 +74,12 @@ def main():
     # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
     if "train" in sys.argv[1:]:
         training.advancedTrainer.AdvancedAdversarialTrainer(
-            epochs=250,
+            epochs=500,
             datset_size=4096
         ).train()
     
     if "view" in sys.argv[1:]:
-        Reviewer().review("checkpoints/model_advanced.pth")
+        Reviewer().review("checkpoints/collab.pth")
 
 
 if __name__ == "__main__":

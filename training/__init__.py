@@ -50,12 +50,12 @@ class ImageTrainertemplate(ABC):
         self.epoch_bar = misc.RainbowProgressBar(range(self.EPOCHS), bar_format='[ {remaining} - ({rate_fmt} ) -> {elapsed} ] Epoch {n_fmt}/{total_fmt}{postfix} |{bar}|')
 
         for epoch in self.epoch_bar:
+            if ( epoch % 100 == 99 ):
+                self.model.save() 
             self.train_epoch(epoch)
         
         print("\n",end="")
-
-        if ( self.__getattribute__("model") != None ):
-            self.model.save()
+        self.model.save()
     
     def transform_batch(self,batch):
         """
