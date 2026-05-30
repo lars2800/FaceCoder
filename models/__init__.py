@@ -1,1 +1,2 @@
 from models.simple import SimpleAdversarialNetwork
+from models.advanced import AdvancedAdversarialNetwork

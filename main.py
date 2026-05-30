@@ -7,15 +7,15 @@ import matplotlib.pyplot as plt
 from devices import DEVICE
 import models
 import datasets
-import training
+import training.advancedTrainer
 
 torch.set_num_threads(16)
             
 class Reviewer:
     def __init__(self, num_visualizations: int = 8) -> None:
         self.num_visualizations = num_visualizations
-        
-        self.model = models.SimpleAdversarialNetwork()
+
+        self.model = models.AdvancedAdversarialNetwork() 
         
         dataset = datasets.TorchDataset("ashwingupta3012_human_faces", limit=num_visualizations, starting_index=4096)
         self.view_loader = DataLoader(dataset, batch_size=self.num_visualizations, shuffle=True, num_workers=0)
@@ -29,12 +29,16 @@ class Reviewer:
         batch_images = batch_images.view(-1, 1, 64, 64).to(DEVICE)
         
         with torch.no_grad():
-            reconstructed_images = self.model.model_auto_encoder(batch_images)
+            _, reconstructed_images = self.model.model_auto_encoder(batch_images)
+
+            random_noise = torch.randn(self.num_visualizations, self.model.latent_dim).to(DEVICE)
+            generated_images = self.model.model_auto_encoder.decode(random_noise)
             
         originals = batch_images.cpu().numpy()
         reconstructions = reconstructed_images.cpu().numpy()
+        generations = generated_images.cpu().numpy()
         
-        fig, axes = plt.subplots(2, self.num_visualizations, figsize=(self.num_visualizations * 2, 7))
+        fig, axes = plt.subplots(3, self.num_visualizations, figsize=(self.num_visualizations * 2, 10))
         
         for i in range(self.num_visualizations):
             # Row 1: Originals
@@ -44,12 +48,19 @@ class Reviewer:
             if i == 0:
                 ax_orig.set_title("Originals", fontsize=12, fontweight='bold', loc='left')
                 
-            # Row 2: Autoencoded
+            # Row 2: Autoencoded (Reconstructed)
             ax_recon = axes[1, i]
             ax_recon.imshow(reconstructions[i, 0], cmap='gray')
             ax_recon.axis('off')
             if i == 0:
                 ax_recon.set_title("Autoencoded", fontsize=12, fontweight='bold', loc='left')
+
+            # Row 3: Generated from Scratch
+            ax_gen = axes[2, i]
+            ax_gen.imshow(generations[i, 0], cmap='gray')
+            ax_gen.axis('off')
+            if i == 0:
+                ax_gen.set_title("Generated (Fake)", fontsize=12, fontweight='bold', loc='left')
                 
         plt.tight_layout()
         plt.show()
@@ -62,13 +73,13 @@ def main():
     
     # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
     if "train" in sys.argv[1:]:
-        training.SimpleAdversarialTrainer(
-            epochs=500, # 100 epochs = 10min ( 4096 size )
-            datset_size=1024
+        training.advancedTrainer.AdvancedAdversarialTrainer(
+            epochs=250,
+            datset_size=2048
         ).train()
     
     if "view" in sys.argv[1:]:
-        Reviewer().review("checkpoints/model.pth")
+        Reviewer().review("checkpoints/model_advanced.pth")
 
 
 if __name__ == "__main__":
