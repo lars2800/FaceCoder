@@ -74,8 +74,8 @@ def main():
     # Yes I know, but it's just for testing, the sys arguments don't matter that much for now
     if "train" in sys.argv[1:]:
         training.advancedTrainer.AdvancedAdversarialTrainer(
-            epochs=250,
-            datset_size=2048
+            epochs=50,
+            datset_size=256
         ).train()
     
     if "view" in sys.argv[1:]:

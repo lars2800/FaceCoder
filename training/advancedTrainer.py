@@ -17,8 +17,8 @@ class AdvancedAdversarialTrainer(ImageTrainertemplate):
         })
 
     def create_optimizers_and_critereons(self) -> None:
-        self.reconstruction_loss_mult = 2.0
-        self.adversarial_loss_mult = 0.01
+        self.reconstruction_loss_mult = 1.0
+        self.adversarial_loss_mult = 0.02
 
         self.optimizer_auto_encoder  = torch.optim.Adam(self.model.model_auto_encoder.parameters(),  lr=self.learn_rate)
         self.optimizer_discriminator = torch.optim.Adam(self.model.model_discriminator.parameters(), lr=self.learn_rate)
